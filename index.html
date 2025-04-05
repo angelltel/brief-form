@@ -98,24 +98,45 @@
       const scriptURL = 'https://script.google.com/macros/s/AKfycbwZ8FdENA85rotyCsEDqNMSJ4DAFaAguJJMU52XfZXDClF_KD5Y0G99HfhwLLdEHFFf/exec';
 
       // Отправка в Google Таблицу
-      fetch(scriptURL, {
-        method: 'POST',
-        mode: 'no-cors',
-        body: JSON.stringify(result),
-        headers: { 'Content-Type': 'application/json' }
-      }).then(() => {
-        // Если в Telegram WebApp — передать данные обратно
-        if (window.Telegram && Telegram.WebApp) {
-          Telegram.WebApp.sendData(JSON.stringify(result));
-          Telegram.WebApp.close();
-        } else {
-          alert('Форма успешно отправлена!');
-          form.reset();
-        }
-      }).catch(err => {
-        console.error('Ошибка отправки:', err);
-        alert('Ошибка при отправке формы.');
-      });
+     <script>
+  const form = document.getElementById('briefForm');
+
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const consentCheckbox = document.getElementById('consent');
+    if (!consentCheckbox.checked) {
+      alert('Пожалуйста, подтвердите согласие на обработку персональных данных.');
+      return;
+    }
+
+    const data = new FormData(form);
+    const result = {};
+    data.forEach((value, key) => result[key] = value);
+
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbwZ8FdENA85rotyCsEDqNMSJ4DAFaAguJJMU52XfZXDClF_KD5Y0G99HfhwLLdEHFFf/exec';
+
+    fetch(scriptURL, {
+      method: 'POST',
+      mode: 'no-cors', // 🔥 чтобы обойти CORS
+      body: JSON.stringify(result),
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    }).then(() => {
+      if (window.Telegram && Telegram.WebApp) {
+        Telegram.WebApp.sendData(JSON.stringify(result));
+        Telegram.WebApp.close();
+      } else {
+        alert('Форма успешно отправлена!');
+        form.reset();
+      }
+    }).catch(err => {
+      console.error('Ошибка при отправке:', err);
+      alert('Ошибка отправки формы.');
+    });
+  });
+</script>
     });
   </script>
 </body>
