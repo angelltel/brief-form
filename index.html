@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Бриф</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 20px;
+      background: #f9f9f9;
+    }
+    h2 {
+      text-align: center;
+    }
+    form {
+      max-width: 500px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      font-size: 14px;
+    }
+    button {
+      width: 100%;
+      padding: 12px;
+      background-color: #0088cc;
+      color: white;
+      border: none;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #0077b3;
+    }
+    .checkbox-wrapper {
+      font-size: 14px;
+      margin-bottom: 15px;
+      display: flex;
+      align-items: flex-start;
+    }
+    .checkbox-wrapper input[type="checkbox"] {
+      margin-top: 4px;
+      margin-right: 10px;
+    }
+    .checkbox-wrapper a {
+      color: #0088cc;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <h2>Бриф</h2>
+  <form id="briefForm">
+    <input type="text" name="name" placeholder="Ваше имя" required>
+    <input type="text" name="telegram" placeholder="Ник в Telegram (@nickname)" required>
+    <input type="text" name="phone" placeholder="Телефон для мессенджеров" required>
+    <input type="text" name="source" placeholder="Откуда вы о нас узнали?" required>
+    <textarea name="question" placeholder="Ваш вопрос или комментарий" rows="4" required></textarea>
+
+    <div class="checkbox-wrapper">
+      <input type="checkbox" id="consent" required>
+      <label for="consent">
+        Я даю <a href="https://docs.google.com/document/d/1SoQhxoOSOtCcJ30D-WUn1t_BV3RqpW355tpco-DHYog/edit?tab=t.0" target="_blank">согласие на обработку персональных данных</a>
+      </label>
+    </div>
+
+    <button type="submit">Отправить</button>
+  </form>
+
+  <script>
+    const form = document.getElementById('briefForm');
+
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const consentCheckbox = document.getElementById('consent');
+      if (!consentCheckbox.checked) {
+        alert('Пожалуйста, подтвердите согласие на обработку персональных данных.');
+        return;
+      }
+
+      const data = new FormData(form);
+      const result = {};
+      data.forEach((value, key) => result[key] = value);
+
+      // URL Google Apps Script
+      const scriptURL = 'https://script.google.com/macros/s/AKfycbwZ8FdENA85rotyCsEDqNMSJ4DAFaAguJJMU52XfZXDClF_KD5Y0G99HfhwLLdEHFFf/exec';
+
+      // Отправка в Google Таблицу
+      fetch(scriptURL, {
+        method: 'POST',
+        body: JSON.stringify(result),
+        headers: { 'Content-Type': 'application/json' }
+      }).then(() => {
+        // Если в Telegram WebApp — передать данные обратно
+        if (window.Telegram && Telegram.WebApp) {
+          Telegram.WebApp.sendData(JSON.stringify(result));
+          Telegram.WebApp.close();
+        } else {
+          alert('Форма успешно отправлена!');
+          form.reset();
+        }
+      }).catch(err => {
+        console.error('Ошибка отправки:', err);
+        alert('Ошибка при отправке формы.');
+      });
+    });
+  </script>
+</body>
+</html>
